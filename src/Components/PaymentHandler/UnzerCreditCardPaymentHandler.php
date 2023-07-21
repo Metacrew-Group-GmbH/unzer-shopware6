@@ -88,9 +88,13 @@ class UnzerCreditCardPaymentHandler extends AbstractUnzerPaymentHandler
         $registerCreditCards = $this->pluginConfig->get(ConfigReader::CONFIG_KEY_REGISTER_CARD, false);
 
         try {
-            $recurrenceType = $registerCreditCards && $this->deviceRepository->exists($this->paymentType->getId(), $salesChannelContext->getContext())
-                ? RecurrenceTypes::ONE_CLICK
-                : null;
+            if ($dataBag->has('recurrenceType')) {
+                $recurrenceType = $dataBag->get('recurrenceType');
+            } elseif ($registerCreditCards && $this->deviceRepository->exists($this->paymentType->getId(), $salesChannelContext->getContext())) {
+                $recurrenceType = RecurrenceTypes::ONE_CLICK;
+            } else {
+                $recurrenceType = null;
+            }
 
             $returnUrl = $bookingMode === BookingMode::CHARGE
                 ? $this->charge($transaction->getReturnUrl(), $recurrenceType)
