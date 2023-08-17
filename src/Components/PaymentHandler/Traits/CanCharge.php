@@ -48,6 +48,10 @@ trait CanCharge
             $charge->setRiskData($riskData);
         }
 
+        if (property_exists($this, 'invoiceId') && $this->invoiceId !== null) {
+            $charge->setInvoiceId($this->invoiceId);
+        }
+
         $paymentResult = $this->unzerClient->performCharge(
             $charge,
             $this->paymentType,
