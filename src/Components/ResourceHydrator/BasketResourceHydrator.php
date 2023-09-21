@@ -94,6 +94,10 @@ class BasketResourceHydrator implements ResourceHydratorInterface
                 continue;
             }
 
+            if ($lineItem->getType() === 'bundle_product_item') {
+                continue;
+            }
+
             if ($lineItem->getPrice() === null) {
                 $basketItem = new BasketItem();
                 $basketItem->setTitle($lineItem->getLabel());
