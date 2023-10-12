@@ -1,3 +1,15 @@
+# 5.4.1
+* Korrektur der Zahlung via PayPal als Gast
+
+# 5.4.0
+* Entfernung der Einstellungen für die Registrierung von Zahlungsdaten aus der Plugin-Konfiguration
+* Ergänzung und Anpassung der Registrierung von Zahlungsdaten im Checkout 
+
+# 5.3.0
+* Korrektur der Namen für die Routen im Frontend
+* Kompatibilität zu PHP 8.2 hergestellt
+* Korrektur der Reihenfolge der Transaktionen im Unzer Tab bei einer Bestellung
+
 # 5.2.0
 * Kompatibilität zu Shopware 6.5 hergestellt
 * Korrektur der Warenkorbpreisberechnung für Netto-Kunden (Danke an twidmer)
