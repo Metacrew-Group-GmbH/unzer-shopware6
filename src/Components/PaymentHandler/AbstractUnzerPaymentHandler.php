@@ -116,6 +116,7 @@ abstract class AbstractUnzerPaymentHandler implements AsynchronousPaymentHandler
         $this->requestStack = $requestStack;
         $this->logger = $logger;
         $this->customFieldsHelper = $customFieldsHelper;
+        $this->invoiceId = null;
     }
 
     public function pay(
@@ -144,8 +145,6 @@ abstract class AbstractUnzerPaymentHandler implements AsynchronousPaymentHandler
 
             if ($dataBag->has('unzerInvoiceId')) {
                 $this->invoiceId = $dataBag->get('unzerInvoiceId');
-            } else {
-                $this->invoiceId = null;
             }
 
             return new RedirectResponse($transaction->getReturnUrl());
