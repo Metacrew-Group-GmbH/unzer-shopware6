@@ -14,6 +14,7 @@
         </div>
 
         {% if not context.customer.guest %}
+            {% block unzer_payment_frame_sepa_direct_debit_remember %}
             <div class="custom-control custom-checkbox">
                 <input type="checkbox"
                        class="custom-control-input"
@@ -23,6 +24,7 @@
                 />
                 <label for="rememberSepaMandate" class="custom-control-label">{{ "UnzerPayment.frame.sepa.mandate.remember" | trans  }}</label>
             </div>
+            {% endblock %}
         {% endif %}
     </div>
 {% endblock %}
