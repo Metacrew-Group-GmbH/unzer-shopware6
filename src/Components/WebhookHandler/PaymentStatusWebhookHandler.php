@@ -80,6 +80,12 @@ class PaymentStatusWebhookHandler implements WebhookHandlerInterface
 
         $transaction = $this->getOrderTransaction($payment->getOrderId(), $context->getContext());
 
+
+
+        // ToDo: remove! debugging FAV-1457
+        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transaction->getId().') ('.getmypid().') The webhook executed. ' . __METHOD__.':'.__LINE__);
+
+
         if ($transaction === null) {
             $this->logger->error(
                 sprintf(

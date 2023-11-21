@@ -186,7 +186,7 @@ abstract class AbstractUnzerPaymentHandler implements AsynchronousPaymentHandler
     {
 
         // ToDo: remove! debugging FAV-1457
-        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.getmypid().') The finalize triggered.'  . __METHOD__.':'.__LINE__ .' => '. $request->getRequestUri());
+        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transaction->getOrderTransaction()->getId().') ('.getmypid().') The finalize triggered.'  . __METHOD__.':'.__LINE__ .' => '. $request->getRequestUri());
 
 
 
