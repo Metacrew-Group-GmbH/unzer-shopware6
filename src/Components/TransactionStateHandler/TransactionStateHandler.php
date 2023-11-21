@@ -10,6 +10,7 @@ use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionDefi
 use Shopware\Core\Framework\Context;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionActions;
 use Shopware\Core\System\StateMachine\Exception\IllegalTransitionException;
+use Shopware\Core\System\StateMachine\Exception\UnnecessaryTransitionException;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
 use UnzerPayment6\Components\DependencyInjection\Factory\PaymentTransitionMapperFactory;
@@ -122,11 +123,19 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
                 ),
                 $context
             );
-        } catch (IllegalTransitionException $exception) {
-            // false positive handling (state to state) like open -> open, paid -> paid, etc.
-
+        } catch (UnnecessaryTransitionException $exception) {
+            // Already transitioned! (state to same state) like do_pay -> do_pay, paid -> paid, etc. -> ignore transition!
+            $this->logger->debug(
+                sprintf(
+                    'UnnecessaryTransitionException: transaction (%s) transition from %s to %s is unnecessary',
+                    $transactionId,
+                    $transition,
+                    $transition
+                )
+            );
             // ToDo: remove! debugging FAV-1457
-            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The IllegalTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' => '. $exception->getMessage());
+//            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The UnnecessaryTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' => '. $exception->getMessage());
+            return;
         }
 
         // If payment should be in state "paid", `do_pay` is given -> finalize state
