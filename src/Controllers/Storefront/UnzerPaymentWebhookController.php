@@ -47,7 +47,7 @@ class UnzerPaymentWebhookController extends StorefrontController
     {
 
         // ToDo: remove! debugging FAV-1457
-        $this->logger->error('BOOOOOOOOOOOOOOOOOOM The webhook triggered.');
+        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.getmypid().') The webhook triggered.');
 
         /** @var false|string $requestContent */
         $requestContent = $request->getContent();
