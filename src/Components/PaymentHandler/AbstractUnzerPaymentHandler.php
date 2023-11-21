@@ -184,6 +184,12 @@ abstract class AbstractUnzerPaymentHandler implements AsynchronousPaymentHandler
         SalesChannelContext           $salesChannelContext
     ): void
     {
+
+        // ToDo: remove! debugging FAV-1457
+        $this->logger->error('BOOOOOOOOOOOOOOOOOOM The finalize triggered.'  . __METHOD__.':'.__LINE__ .' => '. $request->getRequestUri());
+
+
+
         try {
             $this->pluginConfig = $this->configReader->read($salesChannelContext->getSalesChannel()->getId());
             $this->unzerClient = $this->clientFactory->createClient($salesChannelContext->getSalesChannel()->getId());

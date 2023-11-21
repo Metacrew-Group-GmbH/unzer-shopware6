@@ -107,6 +107,11 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
 
     protected function executeTransition(string $transactionId, string $transition, Context $context): void
     {
+
+        // ToDo: remove! debugging FAV-1457
+        $this->logger->error('BOOOOOOOOOOOOOOOOOOM The executeTransition triggered. -> ' . __METHOD__.':'.__LINE__ .' => '.$transition);
+
+
         try {
             $this->stateMachineRegistry->transition(
                 new Transition(
@@ -119,6 +124,9 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
             );
         } catch (IllegalTransitionException $exception) {
             // false positive handling (state to state) like open -> open, paid -> paid, etc.
+
+            // ToDo: remove! debugging FAV-1457
+            $this->logger->error('BOOOOOOOOOOOOOOOOOOM The IllegalTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' => '. $exception->getMessage());
         }
 
         // If payment should be in state "paid", `do_pay` is given -> finalize state
@@ -130,6 +138,9 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
                     StateMachineTransitionActions::ACTION_DO_PAY
                 )
             );
+
+            // ToDo: remove! debugging FAV-1457
+            $this->logger->error('BOOOOOOOOOOOOOOOOOOM The executeTransition triggered. ' . __METHOD__.':'.__LINE__);
 
             $this->executeTransition($transactionId, StateMachineTransitionActions::ACTION_PAID, $context);
         }
