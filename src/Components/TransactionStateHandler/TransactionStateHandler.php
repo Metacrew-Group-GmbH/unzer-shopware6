@@ -127,10 +127,8 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
             // Already transitioned! (state to same state) like do_pay -> do_pay, paid -> paid, etc. -> ignore transition!
             $this->logger->debug(
                 sprintf(
-                    'UnnecessaryTransitionException: transaction (%s) transition from %s to %s is unnecessary',
-                    $transactionId,
-                    $transition,
-                    $transition
+                    'UnnecessaryTransitionException: transaction (%s) ' . $exception->getMessage(),
+                    $transactionId
                 )
             );
             // ToDo: remove! debugging FAV-1457
