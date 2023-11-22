@@ -125,14 +125,19 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
             );
         } catch (UnnecessaryTransitionException $exception) {
             // Already transitioned! (state to same state) like do_pay -> do_pay, paid -> paid, etc. -> ignore transition!
-            $this->logger->debug(
-                sprintf(
-                    'UnnecessaryTransitionException: transaction (%s) ' . $exception->getMessage(),
-                    $transactionId
-                )
-            );
+//            $this->logger->debug(
+//                sprintf(
+//                    'UnnecessaryTransitionException: transaction (%s) ' . $exception->getMessage(),
+//                    $transactionId
+//                )
+//            );
             // ToDo: remove! debugging FAV-1457
-//            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The UnnecessaryTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' => '. $exception->getMessage());
+            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The UnnecessaryTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' => '. $exception->getMessage());
+            return;
+        } catch (IllegalTransitionException $exception) {
+            // IllegalTransition!
+            // ToDo: remove! debugging FAV-1457
+            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The IllegalTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' '. $exception->getMessage());
             return;
         }
 
