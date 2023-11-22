@@ -48,7 +48,7 @@ class UnzerPaymentWebhookController extends StorefrontController
 
         sleep(5);
         // ToDo: remove! debugging FAV-1457
-        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.getmypid().') The webhook triggered.');
+        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.getmypid().') The webhook triggered. => ' . $request->getRequestUri());
 
         /** @var false|string $requestContent */
         $requestContent = $request->getContent();
