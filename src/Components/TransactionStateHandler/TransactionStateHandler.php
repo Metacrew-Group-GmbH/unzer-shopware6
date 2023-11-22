@@ -152,7 +152,7 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
             );
 
             // ToDo: remove! debugging FAV-1457
-            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The executeTransition triggered. ' . __METHOD__.':'.__LINE__);
+            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The executeTransition FALLBACK triggered. ' . __METHOD__.':'.__LINE__ . ' => ' .$transition);
 
             $this->executeTransition($transactionId, StateMachineTransitionActions::ACTION_PAID, $context);
         }
