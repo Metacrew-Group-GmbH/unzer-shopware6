@@ -123,22 +123,10 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
                 ),
                 $context
             );
-        } catch (UnnecessaryTransitionException $exception) {
-            // Already transitioned! (state to same state) like do_pay -> do_pay, paid -> paid, etc. -> ignore transition!
-//            $this->logger->debug(
-//                sprintf(
-//                    'UnnecessaryTransitionException: transaction (%s) ' . $exception->getMessage(),
-//                    $transactionId
-//                )
-//            );
-            // ToDo: remove! debugging FAV-1457
-            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The UnnecessaryTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' => '. $exception->getMessage());
-            return;
         } catch (IllegalTransitionException $exception) {
             // IllegalTransition!
             // ToDo: remove! debugging FAV-1457
             $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The IllegalTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' '. $exception->getMessage());
-            return;
         }
 
         // If payment should be in state "paid", `do_pay` is given -> finalize state
