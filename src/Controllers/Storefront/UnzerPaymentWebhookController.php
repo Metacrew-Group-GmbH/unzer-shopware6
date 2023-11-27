@@ -45,6 +45,7 @@ class UnzerPaymentWebhookController extends StorefrontController
      */
     public function execute(Request $request, SalesChannelContext $salesChannelContext): Response
     {
+        sleep(3); // FAV-1457 race condition workaround!
         /** @var false|string $requestContent */
         $requestContent = $request->getContent();
 
