@@ -10,7 +10,6 @@ use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionDefi
 use Shopware\Core\Framework\Context;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionActions;
 use Shopware\Core\System\StateMachine\Exception\IllegalTransitionException;
-use Shopware\Core\System\StateMachine\Exception\UnnecessaryTransitionException;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
 use UnzerPayment6\Components\DependencyInjection\Factory\PaymentTransitionMapperFactory;
@@ -108,11 +107,6 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
 
     protected function executeTransition(string $transactionId, string $transition, Context $context): void
     {
-
-        // ToDo: remove! debugging FAV-1457
-        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The executeTransition triggered. ' . __METHOD__.':'.__LINE__ .' => '.$transition);
-
-
         try {
             $this->stateMachineRegistry->transition(
                 new Transition(
@@ -124,9 +118,7 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
                 $context
             );
         } catch (IllegalTransitionException $exception) {
-            // IllegalTransition!
-            // ToDo: remove! debugging FAV-1457
-            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The IllegalTransitionException triggered. '  . __METHOD__.':'.__LINE__ .' '. $exception->getMessage());
+            // false positive handling (state to state) like open -> open, paid -> paid, etc.
         }
 
         // If payment should be in state "paid", `do_pay` is given -> finalize state
@@ -138,9 +130,6 @@ class TransactionStateHandler implements TransactionStateHandlerInterface
                     StateMachineTransitionActions::ACTION_DO_PAY
                 )
             );
-
-            // ToDo: remove! debugging FAV-1457
-            $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.$transactionId.') ('.getmypid().') The executeTransition FALLBACK triggered. ' . __METHOD__.':'.__LINE__ . ' => ' .$transition);
 
             $this->executeTransition($transactionId, StateMachineTransitionActions::ACTION_PAID, $context);
         }

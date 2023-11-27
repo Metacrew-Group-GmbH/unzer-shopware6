@@ -45,11 +45,6 @@ class UnzerPaymentWebhookController extends StorefrontController
      */
     public function execute(Request $request, SalesChannelContext $salesChannelContext): Response
     {
-
-        sleep(5);
-        // ToDo: remove! debugging FAV-1457
-        $this->logger->error('BOOOOOOOOOOOOOOOOOOM ('.getmypid().') The webhook triggered. => ' . $request->getRequestUri());
-
         /** @var false|string $requestContent */
         $requestContent = $request->getContent();
 
