@@ -15,6 +15,7 @@ use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use UnzerPayment6\Components\UnzerPaymentClassLoader;
 use UnzerPayment6\Installer\CustomFieldInstaller;
@@ -27,8 +28,13 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     (new UnzerPaymentClassLoader())->register();
 }
 
+/**
+ * @property ContainerInterface $container
+ */
 class UnzerPayment6 extends Plugin
 {
+    public const PLUGIN_NAME = 'UnzerPayment6';
+
     public const MAX_DECIMAL_PRECISION = 4;
 
     public function build(ContainerBuilder $container): void

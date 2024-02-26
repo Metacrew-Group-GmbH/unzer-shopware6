@@ -23,6 +23,7 @@ use UnzerPayment6\Components\CancelService\CancelServiceInterface;
 use UnzerPayment6\Components\ClientFactory\ClientFactoryInterface;
 use UnzerPayment6\Components\ResourceHydrator\PaymentResourceHydrator\PaymentResourceHydratorInterface;
 use UnzerPayment6\Components\ShipService\ShipServiceInterface;
+use UnzerPayment6\Components\Struct\KeyPairContext;
 use UnzerPayment6\Installer\PaymentInstaller;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\TransactionTypes\Charge;
@@ -84,7 +85,7 @@ class UnzerPaymentTransactionController extends AbstractController
             throw new InvalidTransactionException($orderTransactionId);
         }
 
-        $client = $this->clientFactory->createClient($transaction->getOrder()->getSalesChannelId());
+        $client = $this->clientFactory->createClient(KeyPairContext::createFromOrderTransaction($transaction));
 
         try {
             $payment = $client->fetchPaymentByOrderId($orderTransactionId);
@@ -136,7 +137,7 @@ class UnzerPaymentTransactionController extends AbstractController
             throw new InvalidTransactionException($orderTransactionId);
         }
 
-        $client = $this->clientFactory->createClient($transaction->getOrder()->getSalesChannelId());
+        $client = $this->clientFactory->createClient(KeyPairContext::createFromOrderTransaction($transaction));
 
         try {
             $charge = new Charge($amount);
@@ -225,6 +226,42 @@ class UnzerPaymentTransactionController extends AbstractController
     }
 
     /**
+     * @Route("/api/_action/unzer-payment/transaction/{orderTransactionId}/cancel/{authorizationId}/{amount}", name="api.action.unzer.transaction.cancel", methods={"GET"})
+     * @Route("/api/v{version}/_action/unzer-payment/transaction/{orderTransactionId}/cancel/{authorizationId}/{amount}", name="api.action.unzer.transaction.cancel.version", methods={"GET"})
+     */
+    public function cancelTransaction(string $orderTransactionId, string $authorizationId, float $amount, Context $context): JsonResponse
+    {
+        try {
+            $this->cancelService->cancelAuthorizationById($orderTransactionId, $authorizationId, $amount, $context);
+        } catch (UnzerApiException $exception) {
+            $this->logger->error(sprintf('Error while executing cancel transaction for order transaction [%s]: %s', $orderTransactionId, $exception->getMessage()), [
+                'trace' => $exception->getTraceAsString(),
+            ]);
+
+            return new JsonResponse(
+                [
+                    'status' => false,
+                    'errors' => [$exception->getMerchantMessage()],
+                ],
+                Response::HTTP_BAD_REQUEST);
+        } catch (Throwable $exception) {
+            $this->logger->error(sprintf('Error while executing cancel transaction for order transaction [%s]: %s', $orderTransactionId, $exception->getMessage()), [
+                'trace' => $exception->getTraceAsString(),
+            ]);
+
+            return new JsonResponse(
+                [
+                    'status' => false,
+                    'errors' => ['generic-error'],
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        return new JsonResponse(['status' => true]);
+    }
+
+    /**
      * @Route("/api/_action/unzer-payment/transaction/{orderTransactionId}/ship", name="api.action.unzer.transaction.ship", methods={"GET"})
      * @Route("/api/v{version}/_action/unzer-payment/transaction/{orderTransactionId}/ship", name="api.action.unzer.transaction.ship.version", methods={"GET"})
      */
@@ -258,9 +295,11 @@ class UnzerPaymentTransactionController extends AbstractController
         $criteria = new Criteria([$orderTransactionId]);
         $criteria->addAssociations([
             'order',
+            'order.billingAddress',
             'order.currency',
             'order.documents',
             'order.documents.documentType',
+            'paymentMethod',
         ]);
 
         return $this->orderTransactionRepository->search($criteria, $context)->first();

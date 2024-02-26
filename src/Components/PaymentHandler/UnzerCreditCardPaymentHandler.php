@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace UnzerPayment6\Components\PaymentHandler;
 
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -86,13 +87,15 @@ class UnzerCreditCardPaymentHandler extends AbstractUnzerPaymentHandler
             throw new AsyncPaymentProcessException($transaction->getOrderTransaction()->getId(), 'Can not process payment without a valid payment resource.');
         }
 
+        $customer            = $salesChannelContext->getCustomer();
         $bookingMode         = $this->pluginConfig->get(ConfigReader::CONFIG_KEY_BOOKING_MODE_CARD, BookingMode::CHARGE);
         $registerCreditCards = $dataBag->has(self::REMEMBER_CREDIT_CARD_KEY);
+        $saveToDeviceVault   = $this->canSaveToDeviceVault($registerCreditCards, $customer);
 
         try {
             if ($dataBag->has('recurrenceType')) {
                 $recurrenceType = $dataBag->get('recurrenceType');
-            } elseif ($this->deviceRepository->exists($this->paymentType->getId(), $salesChannelContext->getContext())) {
+            } elseif ($this->deviceRepository->exists($this->paymentType->getId(), $salesChannelContext->getContext()) || $saveToDeviceVault) {
                 $recurrenceType = RecurrenceTypes::ONE_CLICK;
             } else {
                 $recurrenceType = null;
@@ -102,9 +105,9 @@ class UnzerCreditCardPaymentHandler extends AbstractUnzerPaymentHandler
                 ? $this->charge($transaction->getReturnUrl(), $recurrenceType)
                 : $this->authorize($transaction->getReturnUrl(), $this->unzerBasket->getTotalValueGross(), $recurrenceType);
 
-            if ($registerCreditCards && $salesChannelContext->getCustomer() !== null && $salesChannelContext->getCustomer()->getGuest() === false) {
+            if ($saveToDeviceVault) {
                 $this->saveToDeviceVault(
-                    $salesChannelContext->getCustomer(),
+                    $customer,
                     UnzerPaymentDeviceEntity::DEVICE_TYPE_CREDIT_CARD,
                     $salesChannelContext->getContext()
                 );
@@ -139,5 +142,10 @@ class UnzerCreditCardPaymentHandler extends AbstractUnzerPaymentHandler
 
             throw new AsyncPaymentProcessException($transaction->getOrderTransaction()->getId(), $exception->getMessage());
         }
+    }
+
+    protected function canSaveToDeviceVault(bool $registerCreditCards, ?CustomerEntity $customer): bool
+    {
+        return $registerCreditCards && $customer !== null && $customer->getGuest() === false;
     }
 }

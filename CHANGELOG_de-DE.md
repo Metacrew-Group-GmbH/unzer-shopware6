@@ -1,3 +1,21 @@
+# 5.6.0
+* Paylater Ratenzahlung als weitere Zahlungsart hinzugefügt
+* Bisherige Ratenzahlung als veraltet markiert
+* Korrektur der Anzeige des Unzer Tabs in der Administration
+
+# 5.5.2
+* Korrektur des Zahlungsstatus "Autorisiert" für Apple Pay, PayPal und Kreditkarte im Modus "Autorisierung"
+* Korrektur des Zahlungsstatus "Fehlgeschlagen" für PayPal und Kreditkarte im Modus "Direkt"
+
+# 5.5.1
+* Korrektur des Bestellabschlusses, wenn die AGB zuerst nicht akzeptiert wurden
+* Korrektur der Kompatibilität zu anderen Plugins, die den CheckoutController dekorieren
+
+# 5.5.0
+* Die Bestellung wird nun nach den Aktionen im Unzer Tab neu geladen, damit unter anderem der Zahlungsstatus korrekt angezeigt wird
+* Ergänzung der Stornierung einer Autorisierung
+* Korrektur an zusätzlichem Parameter bei der Übertragung von Zahlungsdaten an Unzer beim erstmaligen Speichern von Kreditkarteninformationen im Checkout
+
 # 5.4.1
 * Korrektur der Zahlung via PayPal als Gast
 

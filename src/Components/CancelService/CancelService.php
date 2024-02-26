@@ -11,6 +11,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use UnzerPayment6\Components\ClientFactory\ClientFactoryInterface;
+use UnzerPayment6\Components\Struct\KeyPairContext;
 use UnzerPayment6\Installer\PaymentInstaller;
 use UnzerPayment6\UnzerPayment6;
 use UnzerSDK\Constants\CancelReasonCodes;
@@ -64,9 +65,9 @@ class CancelService implements CancelServiceInterface
         $amountNet          = $roundedAmountNet / (10 ** $decimalPrecision);
         $amountVat          = $roundedAmountVat / (10 ** $decimalPrecision);
 
-        $client = $this->clientFactory->createClient($transaction->getOrder()->getSalesChannelId());
+        $client = $this->clientFactory->createClient(KeyPairContext::createFromOrderTransaction($transaction));
 
-        if ($transaction->getPaymentMethodId() === PaymentInstaller::PAYMENT_ID_PAYLATER_INVOICE) {
+        if ($this->isPaylaterPaymentMethod($transaction->getPaymentMethodId())) {
             $cancellation = new Cancellation($amountGross);
 
             $client->cancelChargedPayment(
@@ -88,12 +89,37 @@ class CancelService implements CancelServiceInterface
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function cancelAuthorizationById(string $orderTransactionId, string $authorizationId, float $amountGross, Context $context): void
+    {
+        $transaction = $this->getOrderTransaction($orderTransactionId, $context);
+
+        if ($transaction === null || $transaction->getOrder() === null) {
+            throw new InvalidTransactionException($orderTransactionId);
+        }
+
+        $client = $this->clientFactory->createClient(KeyPairContext::createFromOrderTransaction($transaction));
+
+        if ($this->isPaylaterPaymentMethod($transaction->getPaymentMethodId())) {
+            $client->cancelAuthorizedPayment($authorizationId, new Cancellation($amountGross));
+
+            return;
+        }
+
+        $authorization = $client->fetchAuthorization($authorizationId);
+        $authorization->cancel($amountGross);
+    }
+
     protected function getOrderTransaction(string $orderTransactionId, Context $context): ?OrderTransactionEntity
     {
         $criteria = new Criteria([$orderTransactionId]);
         $criteria->addAssociations([
             'order',
+            'order.billingAddress',
             'order.currency',
+            'paymentMethod',
         ]);
 
         return $this->orderTransactionRepository->search($criteria, $context)->first();
@@ -102,5 +128,10 @@ class CancelService implements CancelServiceInterface
     protected function getCancelReasonCode(?string $reasonCode): string
     {
         return $reasonCode ?? CancelReasonCodes::REASON_CODE_CANCEL;
+    }
+
+    protected function isPaylaterPaymentMethod(string $paymentMethodId): bool
+    {
+        return in_array($paymentMethodId, [PaymentInstaller::PAYMENT_ID_PAYLATER_INVOICE, PaymentInstaller::PAYMENT_ID_PAYLATER_INSTALLMENT]);
     }
 }
