@@ -64,4 +64,11 @@
             {% endif %}
         {% endfor %}
     {% endblock %}
+
+{% block document_payment_shipping_inner %}
+    {{ parent() }}
+
+    {% if order.transactions.last.paymentMethodId == constant('UnzerPayment6\\Installer\\PaymentInstaller::PAYMENT_ID_PAYLATER_INSTALLMENT') %}
+        <h4>{{ "UnzerPayment.transferInformation.installmentInfo" | trans }}</h4>
+    {% endif %}
 {% endblock %}
